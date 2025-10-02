@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from .forms import DateInput, LastActiveForm
+
 
 import os
 import folium
@@ -9,6 +11,7 @@ from folium.plugins import MousePosition
 
 # Create your views here.
 def home(request):
+    form = LastActiveForm()
     shp_dir = os.path.join(os.getcwd(), 'media', 'shp')
 
     m = folium.Map(location=[0.0236, 37.9062], zoom_start=6)
@@ -69,7 +72,7 @@ def home(request):
     m.add_child(popup1)
 
     m = m._repr_html_()
-    context = {'my_map': m}
+    context = {'my_map': m, 'form': form}
     return render(request, 'geoApp/home.html', context)
 
 @csrf_exempt
@@ -81,5 +84,11 @@ def rev_click(request):
         print(f"Received coordinates: Latitude={lat}, Longitude={lng}")
         # You can process the coordinates as needed here
         # For example, save them to the database or perform some calculations
+        form = LastActiveForm(request.POST)
+        if form.is_valid():
+            last_active = form.cleaned_data['last_active']
+            print(f"Received date: {last_active}")
+        else:
+            print("Form is not valid")
 
     return redirect('home')

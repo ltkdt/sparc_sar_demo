@@ -32,3 +32,11 @@ class LatLngPopup(MacroElement):
         self._name = "LatLngPopup"
         self.longt = 0
         self.latt = 0
+
+
+<form method="post" action="{% url 'rev_click' %}" id="mainForm">
+        {% csrf_token %}
+        {{ form.last_active }}
+        
+        <button type="submit">Submit</button>
+    </form>
