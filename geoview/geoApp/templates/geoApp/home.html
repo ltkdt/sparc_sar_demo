@@ -65,10 +65,28 @@
         <p class="lead text-danger">Sản phẩm của đội thi Brave New World</p>
 
     <form id="coordForm" action="/revClick/" method="POST">
+          <div class="row justify-content-center mb-2">
+            <div class="col-12">
+              <label class="form-label h5">Hướng dẫn sử dụng</label>
+              <div class="text-muted small mt-2">
+                Hãy chọn khoảng thời gian hoặc để 2 form ngày giống nhau để chọn 1 ngày.<br>
+                Nhấn 1 tọa độ ở trên bản đồ rồi submit & hệ thống sẽ tìm điểm gần nhất với những khu vực có sẵn.
+              </div>
+            </div>
+          </div>
           {% csrf_token %}
-          {{ form.last_active }}
 
-          <div class="mb-5"></div> <!-- Adds extra space below the map -->
+          <p></p>
+          <div class="row justify-content-center g-2 mb-3">
+            <div class="col-md-3">
+              {{ form.start_active }}
+            </div>
+            <div class="col-md-3">
+              {{ form.end_active }}
+            </div>
+          </div>
+
+          <div class="mb-3"></div> <!-- Adds extra space below the map -->
 
           <input type="hidden" name="lat" id="latInput">
           <input type="hidden" name="lng" id="lngInput">
@@ -76,17 +94,11 @@
           <button type="submit" class="btn btn-outline-dark rounded px-4 fw-medium">Submit</button>
           <div class="mb-5"></div> <!-- Adds extra space below the map -->
     </form>
-
-    
-
   
     {{ my_map|safe }}
 
     <div class="mb-5"></div> <!-- Adds extra space below the map -->
 
-  
-
-    
 
         <ul class="list-unstyled">
           <li>Brave New World</li>

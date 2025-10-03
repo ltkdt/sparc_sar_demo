@@ -86,8 +86,10 @@ def rev_click(request):
         # For example, save them to the database or perform some calculations
         form = LastActiveForm(request.POST)
         if form.is_valid():
-            last_active = form.cleaned_data['last_active']
-            print(f"Received date: {last_active}")
+            start_active = form.cleaned_data['start_active']
+            end_active = form.cleaned_data['end_active']
+            print(f"Start Active: {start_active}, End Active: {end_active}")
+            # Process the form data as needed
         else:
             print("Form is not valid")
 

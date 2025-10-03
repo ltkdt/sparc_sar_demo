@@ -8,4 +8,5 @@ class LastActiveForm(forms.Form):
     """
     Last Active Date Form
     """
-    last_active = forms.DateField(widget=DateInput)
+    start_active = forms.DateField(widget=DateInput, label="Start Date")
+    end_active = forms.DateField(widget=DateInput, label="End Date")
