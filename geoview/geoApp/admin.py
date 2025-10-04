@@ -1,7 +1,11 @@
 from django.contrib import admin
-# from .models import WorldBorder
-'''
-@admin.register(WorldBorder)
-class WorldBorderAdmin(admin.ModelAdmin):
-	list_display = ('name', 'area', 'pop2005', 'region', 'subregion')
-'''
+
+from .models import DemData, StaticFigure
+
+@admin.register(DemData)
+class DemDataAdmin(admin.ModelAdmin):
+	list_display = ('name', 'region', 'description')
+
+@admin.register(StaticFigure)
+class StaticFigureAdmin(admin.ModelAdmin):
+	list_display = ('name', 'region', 'description')

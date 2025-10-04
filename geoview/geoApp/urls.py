@@ -5,5 +5,5 @@ from . import views
 urlpatterns = [
    path('',views.home, name='home'),
    path('revClick/', views.rev_click, name='rev_click'),
-   path('output/', views.output, name='output'),
+   path('output/<str:neartest_location>/', views.output, name='output'),
 ]

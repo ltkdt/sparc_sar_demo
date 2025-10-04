@@ -2,8 +2,11 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from .forms import DateInput, LastActiveForm
+from .models import StaticFigure
+from django.db.models import Q
+from datetime import datetime
 
-
+import math
 import os
 import folium
 import geopandas as gpd
@@ -101,6 +104,43 @@ def home(request):
     context = {'my_map': m, 'form': form}
     return render(request, 'geoApp/home.html', context)
 
+cor_dict = {"Long An": [10.5833, 106.6333], "Hồ Chí Minh": [10.8230, 106.6297], "Đồng Nai": [11.0000, 106.0000], "Bình Dương": [11.1667, 106.6667], "Tây Ninh": [11.3333, 106.1667], "Bến Tre": [10.2333, 106.3833], "An Giang": [10.4667, 105.1667], "Kiên Giang": [10.0333, 105.0667], "Cần Thơ": [10.0333, 105.0667], "Vĩnh Long": [10.2500, 105.9667], "Trà Vinh": [9.9333, 105.9667], "Sóc Trăng": [9.6000, 105.9667], "Bạc Liêu": [9.2833, 105.7500], "Cà Mau": [9.1833, 105.1667]}
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees) using Haversine formula
+    """
+    # Convert decimal degrees to radians
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a))
+    
+    # Radius of earth in kilometers
+    r = 6371
+    return c * r
+
+def find_nearest_location(input_lat, input_lng, locations_dict):
+    """
+    Find the nearest location from the dictionary to the input coordinates
+    """
+    min_distance = float('inf')
+    nearest_location = None
+    
+    for location_name, coords in locations_dict.items():
+        lat, lng = coords[0], coords[1]
+        distance = calculate_distance(input_lat, input_lng, lat, lng)
+        
+        if distance < min_distance:
+            min_distance = distance
+            nearest_location = location_name
+    
+    return nearest_location, min_distance
+
 @csrf_exempt
 def rev_click(request):
     if request.method == 'POST':
@@ -115,11 +155,74 @@ def rev_click(request):
             start_active = form.cleaned_data['start_active']
             end_active = form.cleaned_data['end_active']
             print(f"Start Active: {start_active}, End Active: {end_active}")
-            # Process the form data as needed
+            
+            # Store date range in session for use in output view
+            request.session['start_active'] = start_active.isoformat() if start_active else None
+            request.session['end_active'] = end_active.isoformat() if end_active else None
         else:
             print("Form is not valid")
+            # Clear session data if form is invalid
+            request.session['start_active'] = None
+            request.session['end_active'] = None
+        
+        nearest_location, min_distance = find_nearest_location(float(lat), float(lng), cor_dict)
+        if min_distance > 100:
+            nearest_location = "Không có dữ liệu"
+        
+        return redirect('output', neartest_location=nearest_location)
 
-    return redirect('output')
 
-def output(request):
-    return render(request, 'geoApp/output.html')
+def output(request, neartest_location=None):
+    # Get the nearest location from URL parameter or set default
+    figures = []
+    
+    if neartest_location and neartest_location != "Không có dữ liệu":
+        # Get date range from session
+        start_date_str = request.session.get('start_active')
+        end_date_str = request.session.get('end_active')
+        
+        # Parse date strings back to date objects
+        start_date = None
+        end_date = None
+        if start_date_str:
+            try:
+                start_date = datetime.fromisoformat(start_date_str).date()
+            except (ValueError, TypeError):
+                start_date = None
+        if end_date_str:
+            try:
+                end_date = datetime.fromisoformat(end_date_str).date()
+            except (ValueError, TypeError):
+                end_date = None
+        
+        # Filter figures based on region and date range
+        if start_date and end_date:
+            # Both dates provided - filter by date range
+            figures = StaticFigure.objects.filter(
+                region=neartest_location,
+                date_taken__range=[start_date, end_date]
+            ).order_by('-date_taken')
+        elif start_date:
+            # Only start date provided - filter from start date onwards
+            figures = StaticFigure.objects.filter(
+                region=neartest_location,
+                date_taken__gte=start_date
+            ).order_by('-date_taken')
+        elif end_date:
+            # Only end date provided - filter up to end date
+            figures = StaticFigure.objects.filter(
+                region=neartest_location,
+                date_taken__lte=end_date
+            ).order_by('-date_taken')
+        else:
+            # No date range - show all figures for the region
+            figures = StaticFigure.objects.filter(
+                region=neartest_location
+            ).order_by('-date_taken')
+    
+    context = {
+        'neartest_location': neartest_location,
+        'figures': figures,
+        'figure_count': len(figures)
+    }
+    return render(request, 'geoApp/output.html', context)
