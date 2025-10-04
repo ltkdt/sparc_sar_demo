@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from .forms import DateInput, LastActiveForm
@@ -12,6 +13,7 @@ from folium.plugins import MousePosition
 # Create your views here.
 def home(request):
     form = LastActiveForm()
+    '''
     shp_dir = os.path.join(os.getcwd(), 'media', 'shp')
 
     m = folium.Map(location=[0.0236, 37.9062], zoom_start=6)
@@ -53,8 +55,32 @@ def home(request):
     #GeoJson(kenya_forestranges_geojson, name='kenya_forestranges', style_function=lambda x: style_kenya_forestranges).add_to(m)
 
     folium.LayerControl().add_to(m)
-    # m.get_root().html.add_child(JavascriptLink('./templates/geoApp/folium_click.js'))
 
+    formatter = "function(num) {return L.Util.formatNum(num, 3) + ' º ';};"
+
+    MousePosition(
+        position="topright",
+        separator=" | ",
+        empty_string="NaN",
+        lng_first=True,
+        num_digits=20,
+        prefix="Coordinates:",
+        lat_formatter=formatter,
+        lng_formatter=formatter,
+    ).add_to(m)
+
+    popup1 = folium.LatLngPopup()
+    m.add_child(popup1)
+    '''
+    shp_dir = os.path.join(os.getcwd(), 'media', 'dbscl')
+
+    m = folium.Map(location=[9.8999, 106.1556], title='Đồng bằng sông Cửu Long' ,zoom_start=9)
+    style_dbscl = {'fillColor': "#63a6bc", 'color': "#2f81b5"}
+    dbscl = gpd.read_file(os.path.join(shp_dir, 'Songcuulong1.shp'))
+    dbscl_geojson = dbscl.to_crs("EPSG:4326").to_json()
+    GeoJson(dbscl_geojson, name='dbscl', style_function=lambda x: style_dbscl).add_to(m)
+    folium.LayerControl().add_to(m)
+    
     formatter = "function(num) {return L.Util.formatNum(num, 3) + ' º ';};"
 
     MousePosition(
@@ -93,4 +119,7 @@ def rev_click(request):
         else:
             print("Form is not valid")
 
-    return redirect('home')
+    return redirect('output')
+
+def output(request):
+    return render(request, 'geoApp/output.html')

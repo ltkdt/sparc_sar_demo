@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.gis",
     "geoApp",
 ]
 
@@ -79,9 +80,13 @@ WSGI_APPLICATION = 'geoview.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'geoapp',         # <-- Replace with your database name
+        'USER': 'postgres',         # <-- Replace with your database user
+        'PASSWORD': 'ku754g93', # <-- Replace with your database password
+        'HOST': 'localhost',            # Or your DB host
+        'PORT': '5432',                 # Default PostgreSQL port
+    },
 }
 
 
