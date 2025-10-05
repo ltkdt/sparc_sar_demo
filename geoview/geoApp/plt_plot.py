@@ -13,6 +13,7 @@ file_path = os.path.join(cwd, "external_data", "temp.dem.tif")
 #file_path = "path_to_your_dem.tif"  # Replace with the path to your DEM file
 with rasterio.open(file_path) as src:
     # Read the DEM data
+    print(src.count)
     dem_data = src.read(1)  # Read the first band
     profile = src.profile   # Metadata of the raster
 

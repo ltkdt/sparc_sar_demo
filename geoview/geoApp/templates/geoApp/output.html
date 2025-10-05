@@ -9,6 +9,60 @@
   <title>Output</title>
   <link rel="stylesheet" href="{% static '/bootstrap/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .figure-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .figure-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+      border: 2px solid #007bff !important;
+    }
+    .figure-card .card-img-top {
+      transition: transform 0.3s ease;
+    }
+    .figure-card:hover .card-img-top {
+      transform: scale(1.05);
+    }
+    .modal-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
+    .modal-body img:hover {
+      transform: scale(1.02);
+    }
+    .figure-info {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .modal-dialog {
+      max-width: 95vw;
+    }
+    .modal-content {
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      border-bottom: 1px solid #dee2e6;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+    .modal-footer {
+      border-top: 1px solid #dee2e6;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    .modal-body .row {
+      align-items: flex-start !important;
+    }
+    .modal-body .col-lg-7, .modal-body .col-xl-6 {
+      position: sticky;
+      top: 0;
+    }
+  </style>
 </head>
 
 <body>
@@ -48,8 +102,16 @@
         <h3 class="mb-3">Hình ảnh liên quan ({{ figure_count }} kết quả)</h3>
         <div class="row">
           {% for figure in figures %}
-            <div class="col-md-6 col-lg-4 mb-4">
-              <div class="card h-100 shadow-sm">
+            <div class="col-md-6 col-lg-4 mb-4" name="figure">
+              <div class="card h-100 shadow-sm figure-card" 
+                   data-bs-toggle="modal" 
+                   data-bs-target="#figureModal"
+                   data-figure-name="{{ figure.name }}"
+                   data-figure-region="{{ figure.region }}"
+                   data-figure-date="{{ figure.date_taken|date:'d/m/Y' }}"
+                   data-figure-description="{{ figure.description }}"
+                   data-figure-image="{% if figure.figure_file %}{{ figure.figure_file.url }}{% endif %}"
+                   data-figure-id="{{ figure.ID }}">
                 <div class="card-img-top" style="height: 250px; overflow: hidden;">
                   {% if figure.figure_file %}
                     <img src="{{ figure.figure_file.url }}" 
@@ -79,7 +141,7 @@
                 </div>
                 <div class="card-footer bg-transparent">
                   <small class="text-muted">
-                    ID: {{ figure.ID }}
+                    <i class="fas fa-info-circle"></i> Click để xem chi tiết
                   </small>
                 </div>
               </div>
@@ -106,6 +168,206 @@
       <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
     </div>
   </div>
+
+  <!-- Figure Modal -->
+  <div class="modal fade" id="figureModal" tabindex="-1" aria-labelledby="figureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-lg-down modal-xl modal-dialog-centered">
+      <div class="modal-content" style="height: 90vh;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="figureModalLabel">
+            <i class="fas fa-image"></i> <span id="modalFigureName"></span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModal()"></button>
+        </div>
+        <div class="modal-body" style="padding: 0; height: calc(90vh - 120px); overflow: hidden;">
+          <div class="row h-100">
+            <div class="col-lg-7 col-xl-6" style="padding: 15px; display: flex; align-items: flex-start; justify-content: center; background: #f8f9fa;">
+              <div class="text-center w-100" style="margin-top: 10px;">
+                <img id="modalFigureImage" src="" alt="" class="img-fluid" style="max-height: calc(90vh - 150px); max-width: 100%; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+              </div>
+            </div>
+            <div class="col-lg-5 col-xl-6" style="padding: 20px 25px 20px 20px; background: #ffffff; border-left: 10px solid #dee2e6; overflow-y: auto;">
+              <div class="figure-info" style="margin-top: 0px; margin-right: 0px;">
+                <h6><i class="fas fa-info-circle text-primary"></i> Thông tin chi tiết</h6>
+                <hr>
+                <p><strong><i class="fas fa-map-marker-alt text-success"></i> Khu vực:</strong> <span id="modalFigureRegion"></span></p>
+                <p><strong><i class="fas fa-calendar text-info"></i> Ngày chụp:</strong> <span id="modalFigureDate"></span></p>
+                <p><strong><i class="fas fa-hashtag text-secondary"></i> ID:</strong> <span id="modalFigureId"></span></p>
+                <hr>
+                <h6><i class="fas fa-align-left text-primary"></i> Mô tả</h6>
+                <p id="modalFigureDescription" class="text-muted"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="downloadImage()">
+            <i class="fas fa-download"></i> Tải xuống
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="{% static '/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  
+  <script>
+    // Handle modal data population
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, setting up modal functionality');
+      
+      // Use event delegation to handle clicks on figure cards
+      document.addEventListener('click', function(e) {
+        // Check if the clicked element is a figure card or inside one
+        const figureCard = e.target.closest('.figure-card');
+        if (figureCard) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Figure card clicked:', figureCard.dataset.figureName);
+          
+          // Populate modal with figure data
+          const nameEl = document.getElementById('modalFigureName');
+          const regionEl = document.getElementById('modalFigureRegion');
+          const dateEl = document.getElementById('modalFigureDate');
+          const descEl = document.getElementById('modalFigureDescription');
+          const idEl = document.getElementById('modalFigureId');
+          
+          if (nameEl) nameEl.textContent = figureCard.dataset.figureName || 'Không có tên';
+          if (regionEl) regionEl.textContent = figureCard.dataset.figureRegion || 'Không có khu vực';
+          if (dateEl) dateEl.textContent = figureCard.dataset.figureDate || 'Không có thông tin';
+          if (descEl) descEl.textContent = figureCard.dataset.figureDescription || 'Không có mô tả';
+          if (idEl) idEl.textContent = figureCard.dataset.figureId || 'N/A';
+          
+          // Set image source
+          const img = document.getElementById('modalFigureImage');
+          if (img) {
+            if (figureCard.dataset.figureImage && figureCard.dataset.figureImage !== 'None' && figureCard.dataset.figureImage !== '') {
+              img.src = figureCard.dataset.figureImage;
+              img.alt = figureCard.dataset.figureName || 'Figure image';
+              console.log('Setting image src:', figureCard.dataset.figureImage);
+            } else {
+              img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=';
+              img.alt = 'Không có hình ảnh';
+            }
+          }
+          
+          // Show the modal
+          const modalElement = document.getElementById('figureModal');
+          if (modalElement) {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const modal = new bootstrap.Modal(modalElement);
+              modal.show();
+              console.log('Bootstrap modal shown');
+            } else {
+              // Fallback: show modal manually
+              modalElement.style.display = 'block';
+              modalElement.classList.add('show');
+              modalElement.setAttribute('aria-hidden', 'false');
+              console.log('Fallback modal shown');
+            }
+          }
+        }
+      });
+      
+      // Also set up direct event listeners as backup
+      const figureCards = document.querySelectorAll('.figure-card');
+      console.log('Found figure cards:', figureCards.length);
+      
+      figureCards.forEach((card, index) => {
+        console.log('Setting up direct listener for card', index);
+        card.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Direct listener - Card clicked:', this.dataset.figureName);
+          
+          // Use the same logic as above
+          const nameEl = document.getElementById('modalFigureName');
+          const regionEl = document.getElementById('modalFigureRegion');
+          const dateEl = document.getElementById('modalFigureDate');
+          const descEl = document.getElementById('modalFigureDescription');
+          const idEl = document.getElementById('modalFigureId');
+          
+          if (nameEl) nameEl.textContent = this.dataset.figureName || 'Không có tên';
+          if (regionEl) regionEl.textContent = this.dataset.figureRegion || 'Không có khu vực';
+          if (dateEl) dateEl.textContent = this.dataset.figureDate || 'Không có thông tin';
+          if (descEl) descEl.textContent = this.dataset.figureDescription || 'Không có mô tả';
+          if (idEl) idEl.textContent = this.dataset.figureId || 'N/A';
+          
+          // Set image source
+          const img = document.getElementById('modalFigureImage');
+          if (img) {
+            if (this.dataset.figureImage && this.dataset.figureImage !== 'None' && this.dataset.figureImage !== '') {
+              img.src = this.dataset.figureImage;
+              img.alt = this.dataset.figureName || 'Figure image';
+              console.log('Setting image src:', this.dataset.figureImage);
+            } else {
+              img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=';
+              img.alt = 'Không có hình ảnh';
+            }
+          }
+          
+          // Show the modal
+          const modalElement = document.getElementById('figureModal');
+          if (modalElement) {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const modal = new bootstrap.Modal(modalElement);
+              modal.show();
+              console.log('Bootstrap modal shown');
+            } else {
+              // Fallback: show modal manually
+              modalElement.style.display = 'block';
+              modalElement.classList.add('show');
+              modalElement.setAttribute('aria-hidden', 'false');
+              console.log('Fallback modal shown');
+            }
+          }
+        });
+      });
+    });
+
+
+    // Close modal function
+    function closeModal() {
+      const modal = document.getElementById('figureModal');
+      if (modal) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const bsModal = bootstrap.Modal.getInstance(modal);
+          if (bsModal) {
+            bsModal.hide();
+          }
+        } else {
+          // Fallback: hide modal manually
+          modal.style.display = 'none';
+          modal.classList.remove('show');
+          modal.setAttribute('aria-hidden', 'true');
+        }
+      }
+    }
+
+    // Download image function
+    function downloadImage() {
+      const img = document.getElementById('modalFigureImage');
+      const link = document.createElement('a');
+      link.href = img.src;
+      link.download = document.getElementById('modalFigureName').textContent + '.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Add loading effect for images
+    document.addEventListener('DOMContentLoaded', function() {
+      const images = document.querySelectorAll('img');
+      images.forEach(img => {
+        img.addEventListener('load', function() {
+          this.style.opacity = '1';
+        });
+        img.style.opacity = '0.7';
+        img.style.transition = 'opacity 0.3s ease';
+      });
+    });
+  </script>
 </body>
 
 </html>

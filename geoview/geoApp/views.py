@@ -75,6 +75,8 @@ def home(request):
     popup1 = folium.LatLngPopup()
     m.add_child(popup1)
     '''
+
+    '''
     shp_dir = os.path.join(os.getcwd(), 'media', 'dbscl')
 
     m = folium.Map(location=[9.8999, 106.1556], title='Đồng bằng sông Cửu Long' ,zoom_start=9)
@@ -83,7 +85,38 @@ def home(request):
     dbscl_geojson = dbscl.to_crs("EPSG:4326").to_json()
     GeoJson(dbscl_geojson, name='dbscl', style_function=lambda x: style_dbscl).add_to(m)
     folium.LayerControl().add_to(m)
+    '''
+    shp_dir = os.path.join(os.getcwd(), 'media', 'vietnam')
+
+    m = folium.Map(location=[16.4667, 107.5833], title='Viet Nam' ,zoom_start=7)
+    style_dbscl = {'fillColor': "#63a6bc", 'color': "#2f81b5"}
+    vietnam = gpd.read_file(os.path.join(shp_dir, 'vnm.shp'))
+    vietnam_geojson = vietnam.to_crs("EPSG:4326").to_json()
+    GeoJson(vietnam_geojson, name='dbscl', style_function=lambda x: style_dbscl).add_to(m)
+    folium.LayerControl().add_to(m)
+
+    # Cao Bang
+    folium.Marker(
+        location= [22.6667, 106.2500],
+        tooltip="Cao Bằng",
+        icon=folium.Icon(color="Red")
+    ).add_to(m)
+
+    # Ha Giang
+    folium.Marker(
+        location= [22.8333, 104.9833],
+        tooltip="Hà Giang",
+        icon=folium.Icon(color="Red")
+    ).add_to(m)
+
+    # Son La
+    folium.Marker(
+        location= [21.3167, 103.9000],
+        tooltip="Sơn La",
+        icon=folium.Icon(color="Red")
+    ).add_to(m)
     
+
     formatter = "function(num) {return L.Util.formatNum(num, 3) + ' º ';};"
 
     MousePosition(
@@ -104,7 +137,72 @@ def home(request):
     context = {'my_map': m, 'form': form}
     return render(request, 'geoApp/home.html', context)
 
-cor_dict = {"Long An": [10.5833, 106.6333], "Hồ Chí Minh": [10.8230, 106.6297], "Đồng Nai": [11.0000, 106.0000], "Bình Dương": [11.1667, 106.6667], "Tây Ninh": [11.3333, 106.1667], "Bến Tre": [10.2333, 106.3833], "An Giang": [10.4667, 105.1667], "Kiên Giang": [10.0333, 105.0667], "Cần Thơ": [10.0333, 105.0667], "Vĩnh Long": [10.2500, 105.9667], "Trà Vinh": [9.9333, 105.9667], "Sóc Trăng": [9.6000, 105.9667], "Bạc Liêu": [9.2833, 105.7500], "Cà Mau": [9.1833, 105.1667]}
+#cor_dict = {"Long An": [10.5833, 106.6333], "Hồ Chí Minh": [10.8230, 106.6297], "Đồng Nai": [11.0000, 106.0000], "Bình Dương": [11.1667, 106.6667], "Tây Ninh": [11.3333, 106.1667], "Bến Tre": [10.2333, 106.3833], "An Giang": [10.4667, 105.1667], "Kiên Giang": [10.0333, 105.0667], "Cần Thơ": [10.0333, 105.0667], "Vĩnh Long": [10.2500, 105.9667], "Trà Vinh": [9.9333, 105.9667], "Sóc Trăng": [9.6000, 105.9667], "Bạc Liêu": [9.2833, 105.7500], "Cà Mau": [9.1833, 105.1667]}
+cor_dict = {
+  "Hà Nội": [21.0333, 105.8500],
+  "Hà Giang": [22.8333, 104.9833],
+  "Cao Bằng": [22.6667, 106.2500],
+  "Bắc Kạn": [22.1333, 105.8333],
+  "Tuyên Quang": [21.8167, 105.2167],
+  "Lào Cai": [22.4833, 103.9500],
+  "Điện Biên": [21.3833, 103.0167],
+  "Lai Châu": [22.0000, 103.1667],
+  "Sơn La": [21.3167, 103.9000],
+  "Yên Bái": [21.7000, 104.8667],
+  "Hoà Bình": [20.8133, 105.3383],
+  "Thái Nguyên": [21.5928, 105.8442],
+  "Lạng Sơn": [21.8478, 106.7578],
+  "Quảng Ninh": [21.0167, 107.3000],
+  "Bắc Giang": [21.2667, 106.2000],
+  "Phú Thọ": [21.3000, 105.2333],
+  "Vĩnh Phúc": [21.3600, 105.5500],
+  "Bắc Ninh": [21.1833, 106.0500],
+  "Hải Dương": [20.9333, 106.3167],
+  "Hải Phòng": [20.8667, 106.6833],
+  "Hưng Yên": [20.6500, 106.0667],
+  "Thái Bình": [20.4461, 106.3422],
+  "Hà Nam": [20.5431, 105.9139],
+  "Nam Định": [20.4200, 106.1683],
+  "Ninh Bình": [20.2500, 105.9667],
+  "Thanh Hóa": [19.8075, 105.7764],
+  "Nghệ An": [18.6733, 105.6819],
+  "Hà Tĩnh": [18.3333, 105.9000],
+  "Quảng Bình": [17.4689, 106.6269],
+  "Quảng Trị": [16.7500, 107.2000],
+  "Thừa Thiên Huế": [16.4667, 107.5833],
+  "Đà Nẵng": [16.0678, 108.2208],
+  "Quảng Nam": [15.5736, 108.3000],
+  "Quảng Ngãi": [15.1167, 108.8000],
+  "Bình Định": [13.7667, 109.2167],
+  "Phú Yên": [13.0833, 109.2833],
+  "Khánh Hòa": [12.2500, 109.1833],
+  "Ninh Thuận": [11.5667, 108.9833],
+  "Bình Thuận": [10.9333, 108.1000],
+  "Kon Tum": [14.3500, 108.0000],
+  "Gia Lai": [13.9833, 108.0000],
+  "Đắk Lắk": [12.6667, 108.0500],
+  "Đắk Nông": [12.0000, 107.6833],
+  "Lâm Đồng": [11.9333, 108.4167],
+  "Bình Phước": [11.7500, 106.9167],
+  "Tây Ninh": [11.3333, 106.1667],
+  "Bình Dương": [11.1667, 106.6667],
+  "Đồng Nai": [11.0000, 106.0000],
+  "Bà Rịa - Vũng Tàu": [10.3333, 107.0667],
+  "Hồ Chí Minh": [10.8230, 106.6297],
+  "Long An": [10.5833, 106.6333],
+  "Tiền Giang": [10.3500, 106.3667],
+  "Bến Tre": [10.2333, 106.3833],
+  "Trà Vinh": [9.9333, 105.9667],
+  "Vĩnh Long": [10.2500, 105.9667],
+  "Đồng Tháp": [10.5167, 105.6333],
+  "An Giang": [10.4667, 105.1667],
+  "Kiên Giang": [10.0333, 105.0667],
+  "Cần Thơ": [10.0333, 105.7833],
+  "Hậu Giang": [9.7833, 105.4667],
+  "Sóc Trăng": [9.6000, 105.9667],
+  "Bạc Liêu": [9.2833, 105.7500],
+  "Cà Mau": [9.1833, 105.1667]
+}
 
 def calculate_distance(lat1, lon1, lat2, lon2):
     """
