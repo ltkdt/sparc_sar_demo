@@ -1,5 +1,7 @@
 # Land subsidence tracking system - Brave New World
 
+## About us and our project
+
 We are Brave New World, a team of students from SPARC Lab, Hanoi University of Science and 
 Techonology participating in this year NASA Space Apps Challenge 2025.
 
