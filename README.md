@@ -1,24 +1,28 @@
-# Code demo dự án Nasa
+# Dự án nghiên cứu sụt lún đất của nhóm Brave New World
 
-## Thư viện
-Dùng pip install để tải
-asf_search
-django
-folium
-geopandas
+## Tóm tắt 
+Đây là dự án của nhóm Brave New World tham dự cuộc thi NASA Space Apps Challenge. 
 
-## Các thành phần đã có trong repo
+Đây là 1 trang Web xây bằng framework Django trong Python mà trong đó người dùng có thể  chọn 1 địa 
+điểm trên map Việt Nam, sau đó hệ thống sẽ hiển thị một số nghiên cứu của nhóm em về độ lún đất và
+sói mòn ở khu vực. Hiện tại đang có 3 khu vực là Cao Bằng, Hà Giang và Sơn La sử dụng ảnh vệ tinh SAR
+ALOS PALSAR.
 
-- Backend cơ bản cho web, để chạy thử server, phải kích hoạt môi trường ảo Python trươc (venv).
-Web mới show một đoạn map mẫu và mình click vào thì backend gửi tọa độ
+## Sử dụng
+Hiện tại web đang sử dụng local host, nếu như dự án được hoàn thiện chỉnh chu sẽ host qua lên 1 
+dịch vụ host phù hợp.
+
+Người dùng có thể clone repo và khởi tạo môi trường Python phù hợp rồi chạy server trên localhost.
+Tuy nhiên dự án có yêu cầu sử dụng cơ sở dữ liệu PostgreSQL với [PostGIS](https://postgis.net/) extension
 
 ```
+pip freeze > requirementrequirements.txt
 cd ./geoview
-python manage.py migrate
 python manage.py runserver
 ```
-- File mẫu `asf_test.py` gọi API của ASF search dựa trên các khu vực địa lí dưới dạng tọa độ (Area of Interest), hiện tại thì chưa xác định cụ thể khu vục sông
 
-- File `cmd.csh` dự kiến là chạy các tool command line của GMTSar hoặc SNAP để xử lí InSAR
+## Một số ảnh về minh hoạ về trang web
 
-- Class `LatLngPopup` trong `features.py` của Folium được sửa lại để làm cho nó gửi đc về backend 
+![Giao diện chọn map](./gallery/UI1.png)
+![Kết quả tìm kiếm](./gallery/UI2.png)
+![Tra cứu và download chi tiết dữ liệu](./gallery/UI3.png)
